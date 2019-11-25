@@ -10,7 +10,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 
-public class awsTest {
+public class awsProject_Wanseok {
     static AmazonEC2 ec2;
 
     private static void init() throws Exception {
