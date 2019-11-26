@@ -19,6 +19,10 @@ import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.MonitorInstancesRequest;
+import com.amazonaws.services.ec2.model.UnmonitorInstancesRequest;
+import com.amazonaws.services.ec2.model.DryRunResult;
+import com.amazonaws.services.ec2.model.DryRunSupportedRequest;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
@@ -187,6 +191,58 @@ ec2 = AmazonEC2ClientBuilder.standard()
         }
             System.out.println();
     }   
+    //9. monitorInstance
+    public static void monitorInstance(String instance_id)
+    {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        DryRunSupportedRequest<MonitorInstancesRequest> dry_request =
+            () -> {
+            MonitorInstancesRequest request = new MonitorInstancesRequest()
+                .withInstanceIds(instance_id);
+            return request.getDryRunRequest();
+        };
+
+        DryRunResult dry_response = ec2.dryRun(dry_request);
+
+        if (!dry_response.isSuccessful()) {
+            System.out.printf(
+                "Failed dry run to enable monitoring on instance %s",
+                instance_id);
+
+            throw dry_response.getDryRunResponse();
+        }
+
+        MonitorInstancesRequest request = new MonitorInstancesRequest().withInstanceIds(instance_id);
+        ec2.monitorInstances(request);
+
+        System.out.printf("Successfully enabled monitoring for instance=%s",instance_id);
+    }
+    //10. unmonitorInstance
+    public static void unmonitorInstance(String instance_id)
+    {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        DryRunSupportedRequest<UnmonitorInstancesRequest> dry_request =
+            () -> {
+            UnmonitorInstancesRequest request = new UnmonitorInstancesRequest().withInstanceIds(instance_id);
+            return request.getDryRunRequest();
+        };
+
+        DryRunResult dry_response = ec2.dryRun(dry_request);
+
+        if (!dry_response.isSuccessful()) {
+            System.out.printf(
+                "Failed dry run to disable monitoring on instance=%s",instance_id);
+
+            throw dry_response.getDryRunResponse();
+        }
+
+        UnmonitorInstancesRequest request = new UnmonitorInstancesRequest().withInstanceIds(instance_id);
+
+        ec2.unmonitorInstances(request);
+
+        System.out.printf(
+            "Successfully disabled monitoring for instance=%s",instance_id);
+    }
     
 public static void main(String[] args) throws Exception {
         init();
@@ -198,6 +254,8 @@ public static void main(String[] args) throws Exception {
         String stop_id = "";
         String ami_id = "";
         String reboot_id = "";
+        String monitor_id = "";
+        String unmonitor_id = "";
         while(true)
         {
             System.out.println(" ");
@@ -212,6 +270,7 @@ public static void main(String[] args) throws Exception {
             System.out.println(" 3. start instance  4. available regions ");
             System.out.println(" 5. stop instance   6. create instance ");
             System.out.println(" 7. reboot instance 8. list images ");
+            System.out.println(" 9. monitorInstance 10. unmonitorInstance ");
             System.out.println(" 99. quit ");
             System.out.println("------------------------------------------------------------");
             System.out.print("Enter an integer: ");
@@ -250,6 +309,16 @@ public static void main(String[] args) throws Exception {
             	break;
             case 8:
             	ListImage();
+            	break;
+            case 9:
+            	System.out.printf("monitor instance id? : ");
+            	monitor_id = id_string.nextLine();
+            	monitorInstance(monitor_id);
+            	break;
+            case 10:
+            	System.out.printf("unmonitor instance id? : ");
+            	unmonitor_id = id_string.nextLine();
+            	unmonitorInstance(unmonitor_id);
             	break;
             case 99:
             	System.exit(0);
