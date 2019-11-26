@@ -1,4 +1,5 @@
 # CloudComputing
-AWS
+AWS-Project
+2015041060 LeeWanSeok
 
-1231234444
+
